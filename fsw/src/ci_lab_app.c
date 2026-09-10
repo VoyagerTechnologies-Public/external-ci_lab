@@ -64,8 +64,8 @@ void CI_LAB_AppMain(void)
     {
         CFE_ES_PerfLogExit(CI_LAB_MAIN_TASK_PERF_ID);
 
-        /* Receive SB buffer, configurable timeout */
-        status = CFE_SB_ReceiveBuffer(&SBBufPtr, CI_LAB_Global.CommandPipe, CI_LAB_PLATFORM_SB_RECEIVE_TIMEOUT);
+        /* Wait for the next command or scheduled uplink request */
+        status = CFE_SB_ReceiveBuffer(&SBBufPtr, CI_LAB_Global.CommandPipe, CFE_SB_PEND_FOREVER);
 
         CFE_ES_PerfLogEntry(CI_LAB_MAIN_TASK_PERF_ID);
 
@@ -74,11 +74,6 @@ void CI_LAB_AppMain(void)
             CI_LAB_TaskPipe(SBBufPtr);
         }
 
-        /* Regardless of packet vs timeout, always process uplink queue if not scheduled */
-        if (CI_LAB_Global.SocketConnected && !CI_LAB_Global.Scheduled)
-        {
-            CI_LAB_ReadUpLink();
-        }
     }
 
     CFE_ES_ExitApp(RunStatus);
